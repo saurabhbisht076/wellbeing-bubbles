@@ -1,21 +1,23 @@
-import React from 'react';
+import React from "react";
+import BubbleField from "./components/BubbleField";
+import './index.css';
 
 const App: React.FC = () => (
-  <div
-    style={{
-      width: '100vw',
-      height: '100vh',
-      background: 'rgba(255,255,255,0.1)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      overflow: 'hidden',
-      position: 'relative',
-    }}
-  >
-    <h1 style={{ color: '#222', fontWeight: 900, fontSize: 28 }}>
-      Wellbeing Bubbles (Starter)
-    </h1>
+  <div>
+    <BubbleField />
+    <div style={{
+      position: "relative",
+      zIndex: 1,
+      textAlign: "center",
+      marginTop: "30vh",
+      fontSize: "2rem",
+      color: "#383838",
+      fontWeight: 700,
+      letterSpacing: 1,
+      textShadow: "0 1px 8px rgba(255,255,255,0.6)",
+    }}>
+      Wellbeing Bubbles
+    </div>
   </div>
 );
 
