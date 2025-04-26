@@ -1,65 +1,116 @@
-import React, { useState, useCallback } from "react";
-import Bubble from "./Bubble";
+import React, { useEffect, useState } from "react";
+
+// Highly visible, contrasting colors
+const COLORS = [
+  "#FF1744", // red
+  "#F50057", // pink
+  "#D500F9", // purple
+  "#651FFF", // deep violet
+  "#2979FF", // blue
+  "#00B8D4", // cyan
+  "#00E676", // green
+  "#FFEA00", // yellow
+  "#FF9100", // orange
+  "#FF3D00", // deep orange
+];
 
 type BubbleData = {
   id: number;
-  size: number;
   left: number;
+  size: number;
   duration: number;
   color: string;
 };
 
-const COLORS = [
-  "#94e2ff", "#a4e6b8", "#f9e79f", "#f8bbd0",
-  "#e1bee7", "#ffe082", "#b2dfdb", "#c5e1a5",
-];
-
-function randomBetween(min: number, max: number) {
-  return Math.random() * (max - min) + min;
-}
-
-let bubbleId = 0;
+let nextId = 0;
 
 const BubbleField: React.FC = () => {
   const [bubbles, setBubbles] = useState<BubbleData[]>([]);
 
-  const addBubble = useCallback(() => {
-    const size = randomBetween(30, 80);
-    const left = randomBetween(5, 95);
-    const duration = randomBetween(6, 15);
-    const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-    const id = bubbleId++;
-    setBubbles((prev) => [...prev, { id, size, left, duration, color }]);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBubbles((prev) => [
+        ...prev,
+        {
+          id: nextId++,
+          left: Math.random() * 90 + 5,
+          size: Math.random() * 50 + 40,
+          duration: Math.random() * 5 + 6,
+          color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        }
+      ]);
+    }, 700);
+
+    return () => clearInterval(interval);
   }, []);
 
-  // Add a new bubble every 800ms
-  React.useEffect(() => {
-    const interval = setInterval(addBubble, 800);
-    return () => clearInterval(interval);
-  }, [addBubble]);
-
-  // Remove bubbles when their animation ends
-  const handleBubbleEnd = (id: number) => {
-    setBubbles((prev) => prev.filter((b) => b.id !== id));
-  };
+  // Remove bubbles after their duration
+  useEffect(() => {
+    if (!bubbles.length) return;
+    const timeout = setTimeout(() => {
+      setBubbles((prev) => prev.slice(1));
+    }, 2000);
+    return () => clearTimeout(timeout);
+  }, [bubbles]);
 
   return (
     <div
       style={{
         position: "fixed",
         inset: 0,
-        overflow: "hidden",
+        background: "linear-gradient(180deg, #181818 0%, #222233 100%)", // dark background
+        zIndex: 1000,
         pointerEvents: "none",
-        zIndex: 0,
-        background: "linear-gradient(180deg, #f0fcff 0%, #fff9e5 100%)",
       }}
     >
-      {bubbles.map((bubble) => (
-        <Bubble
+      {bubbles.map(bubble => (
+        <div
           key={bubble.id}
-          {...bubble}
-          onAnimationEnd={() => handleBubbleEnd(bubble.id)}
-        />
+          className="bubble"
+          style={{
+            position: "absolute",
+            left: `${bubble.left}%`,
+            bottom: -bubble.size,
+            width: bubble.size,
+            height: bubble.size,
+            borderRadius: "50%",
+            zIndex: 1001,
+            animation: `bubble-float ${bubble.duration}s linear forwards`,
+            overflow: "hidden",
+            pointerEvents: "none",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              borderRadius: "50%",
+              background: `radial-gradient(circle at 30% 30%, #fff 60%, ${bubble.color} 100%)`,
+              boxShadow: "0 2px 24px 4px rgba(0,0,0,0.35), 0 0 0 2px #222 inset",
+              opacity: 0.85,
+              position: "relative",
+              transition: "background 0.5s",
+            }}
+          >
+            {/* Reflection spot */}
+            <div
+              style={{
+                position: "absolute",
+                top: "20%",
+                left: "27%",
+                width: "25%",
+                height: "18%",
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.45)",
+                filter: "blur(2px)",
+                pointerEvents: "none",
+              }}
+            />
+          </div>
+        </div>
       ))}
     </div>
   );
